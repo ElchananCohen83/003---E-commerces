@@ -1,0 +1,27 @@
+:root {
+    --spacing-md: 10px;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensures the container fills the entire viewport height */
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+    max-width: 600px;
+    margin: auto;
+}
+
+.TextField {
+    width: calc(100% - var(--spacing-md) * 2); /* Fill the container horizontally with some spacing */
+    max-width: 300px; /* Limit the width if needed */
+    margin-bottom: var(--spacing-md); /* Adds space between text fields */
+}
+
+button {
+    width: calc(100% - var(--spacing-md) * 2); /* Fill the container horizontally with some spacing */
+    max-width: 300px; /* Limit the width if needed */
+    margin-top: var(--spacing-md); /* Adds space above the button */
+}
