@@ -10,9 +10,27 @@ export default function Manager() {
     const [productPrice, setProductPrice] = useState("");
     const [productDetails, setProductDetails] = useState("");
     const [imgUrl, setImgUrl] = useState("");
-    const [data, setData] = useState([]);
+    // const [data, setData] = useState([]);
+    const [massage, setMassage] = useState("");
+
 
     async function addData() {
+        setMassage("");
+
+        if (!productName || !productPrice || !productDetails || !imgUrl) {
+            console.error("Please fill in all fields");
+            setMassage("בבקשה למלא את כל השדות");
+            hideError();
+            return;
+        }
+
+        if (isNaN(productPrice) || parseFloat(productPrice) <= 0) {
+            console.error("Please enter a valid price");
+            setMassage("יש להזין מספרים בלבד");
+            hideError();
+            return;
+        }
+
         try {
             const docRef = await addDoc(collection(db, "products"), {
                 name: productName,
@@ -21,48 +39,57 @@ export default function Manager() {
                 url: imgUrl
             });
             console.log("Document written with ID: ", docRef.id);
+            setMassage("המוצר נקלט בהצלחה");
+            hideError();
 
             // Update the state to include the new product
-            setData([...data, { id: docRef.id, name: productName, price: productPrice, details: productDetails, url: imgUrl }]);
+            // setData([...data, { id: docRef.id, name: productName, price: productPrice, details: productDetails, url: imgUrl }]);
         } catch (e) {
             console.error("Error adding document: ", e);
         }
     }
 
+    function hideError() {
+        setTimeout(() => {
+            setMassage("");
+        }, 2000);
+    }
+
     return (
         <div className="container">
             <h1>הוספת מוצר</h1>
-            <TextField 
-                className='TextField' 
-                label="Product Name" 
-                variant="outlined" 
-                onChange={(e) => setProductName(e.target.value)} 
+            {massage && <p style={{ color: 'red' }}>{massage}</p>}
+            <TextField
+                className='TextField'
+                label="Product Name"
+                variant="outlined"
+                onChange={(e) => setProductName(e.target.value)}
                 margin="normal"
             />
-            <TextField 
-                className='TextField' 
-                label="Product Price" 
-                variant="outlined" 
-                onChange={(e) => setProductPrice(e.target.value)} 
+            <TextField
+                className='TextField'
+                label="Product Price"
+                variant="outlined"
+                onChange={(e) => setProductPrice(e.target.value)}
                 margin="normal"
             />
-            <TextField 
-                className='TextField' 
-                label="Product Details" 
-                variant="outlined" 
-                onChange={(e) => setProductDetails(e.target.value)} 
+            <TextField
+                className='TextField'
+                label="Product Details"
+                variant="outlined"
+                onChange={(e) => setProductDetails(e.target.value)}
                 margin="normal"
             />
-            <TextField 
-                className='TextField' 
-                label="Image URL" 
-                variant="outlined" 
-                onChange={(e) => setImgUrl(e.target.value)} 
+            <TextField
+                className='TextField'
+                label="Image URL"
+                variant="outlined"
+                onChange={(e) => setImgUrl(e.target.value)}
                 margin="normal"
             />
-            <Button 
-                variant="contained" 
-                color="primary" 
+            <Button
+                variant="contained"
+                color="primary"
                 onClick={addData}
                 style={{ marginTop: '20px' }}
             >
