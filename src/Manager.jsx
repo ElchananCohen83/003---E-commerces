@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { db } from './firebase-config';
-import { collection, addDoc } from "firebase/firestore";
+import React, { useEffect, useState, useContext } from 'react';
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import { CartContext } from './context/CartContextProducts.jsx';
+import { useNavigate } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import './General.css';
 
 export default function Manager() {
@@ -10,55 +11,70 @@ export default function Manager() {
     const [productPrice, setProductPrice] = useState("");
     const [productDetails, setProductDetails] = useState("");
     const [imgUrl, setImgUrl] = useState("");
-    // const [data, setData] = useState([]);
-    const [massage, setMassage] = useState("");
+    const [message, setMessage] = useState("");
 
+    const { addProduct } = useContext(CartContext);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const auth = getAuth();
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log('User is signed in:', user.uid);
+            } else {
+                navigate("/SignIn")
+                console.log('User is signed out');
+            }
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, [navigate]);
 
     async function addData() {
-        setMassage("");
+        setMessage("");
 
         if (!productName || !productPrice || !productDetails || !imgUrl) {
             console.error("Please fill in all fields");
-            setMassage("בבקשה למלא את כל השדות");
+            setMessage("בבקשה למלא את כל השדות");
             hideError();
             return;
         }
 
         if (isNaN(productPrice) || parseFloat(productPrice) <= 0) {
             console.error("Please enter a valid price");
-            setMassage("יש להזין מספרים בלבד");
+            setMessage("יש להזין מספרים בלבד");
             hideError();
             return;
         }
 
         try {
-            const docRef = await addDoc(collection(db, "products"), {
+            await addProduct({
                 name: productName,
-                price: productPrice,
+                price: parseFloat(productPrice), // Ensure price is a number
                 details: productDetails,
                 url: imgUrl
             });
-            console.log("Document written with ID: ", docRef.id);
-            setMassage("המוצר נקלט בהצלחה");
+            setMessage("המוצר נקלט בהצלחה");
             hideError();
-
-            // Update the state to include the new product
-            // setData([...data, { id: docRef.id, name: productName, price: productPrice, details: productDetails, url: imgUrl }]);
         } catch (e) {
-            console.error("Error adding document: ", e);
+            console.error("Error adding product: ", e);
+            setMessage("שגיאה בהוספת המוצר");
+            hideError();
         }
     }
 
     function hideError() {
         setTimeout(() => {
-            setMassage("");
+            setMessage("");
         }, 2000);
     }
 
     return (
         <div className="container">
             <h1>הוספת מוצר</h1>
-            {massage && <p style={{ color: 'red' }}>{massage}</p>}
+            {message && <p style={{ color: 'red' }}>{message}</p>}
             <TextField
                 className='TextField'
                 label="Product Name"
