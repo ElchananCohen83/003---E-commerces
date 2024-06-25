@@ -11,7 +11,8 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase-config';
 
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -31,8 +32,19 @@ function ResponsiveAppBar() {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
+  const handleCloseUserMenu = (e) => {
     setAnchorElUser(null);
+    console.log('Menu item clicked:', e.target.textContent);
+    if (e.target.textContent === 'Logout') {
+      signOut(auth)
+        .then(() => {
+          console.log('Sign-out successful.');
+          // Redirect or update UI after successful sign-out
+        })
+        .catch((error) => {
+          console.error('Sign-out error:', error);
+        });
+    }
   };
 
   return (
@@ -146,7 +158,7 @@ function ResponsiveAppBar() {
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                <MenuItem key={setting} onClick={(e) => handleCloseUserMenu(e)}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
               ))}

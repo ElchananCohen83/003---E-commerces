@@ -1,27 +1,9 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import Card from './components/Card';
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
 import './Products.css'
 
 export default function Products() {
   
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log('User is signed in:', user.uid);
-      } else {
-        navigate("/SignIn")
-        console.log('User is signed out');
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [navigate]);
 
   return (
     <>

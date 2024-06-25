@@ -13,6 +13,8 @@ import Products from './Products';
 import Manager from './Manager.jsx';
 import SignUp from "./SignUp.jsx";
 import SignInSide from "./SingIn.jsx";
+import PrivateAccess from "./context/privateAccess.jsx";
+import ExmpleQuery from "./ExmpleQuery.jsx";
 import './App.css';
 
 function Root() {
@@ -41,13 +43,28 @@ export default function App() {
                 <Route index element={<Home />} />
                 <Route path="SignUp" element={<SignUp />} />
                 <Route path="SignIn" element={<SignInSide />} />
-                <Route path="products" element={<Products />} />
-                <Route path="manager" element={<Manager />} />
+                <Route
+                    path="products"
+                    element={
+                        <PrivateAccess>
+                            <Products />
+                        </PrivateAccess>
+                    }
+                />
+                <Route
+                    path="manager"
+                    element={
+                        <PrivateAccess>
+                            <Manager />
+                        </PrivateAccess>
+                    }
+                />
+                <Route path="query" element={<ExmpleQuery />} />
                 <Route path="*" element={<NotFound />} />
             </Route>
         )
     );
-
+    
     return (
         <div id="root">
             <RouterProvider router={router} />

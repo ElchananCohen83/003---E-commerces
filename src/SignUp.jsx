@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,7 +12,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useNavigate } from 'react-router-dom';
 
 function Copyright(props) {
@@ -29,51 +30,62 @@ function Copyright(props) {
 }
 
 // TODO remove, this demo shouldn't need to reset the theme.
-
 const defaultTheme = createTheme();
 
 export default function SignUp() {
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const firstName = data.get('firstName')
-    const lastName = data.get('lastName')
-    const email = data.get('email')
-    const password = data.get('password')
+    const firstName = data.get('firstName');
+    const lastName = data.get('lastName');
+    const email = data.get('email');
+    const password = data.get('password');
+    const photoURL = ''; // אפשר להוסיף URL של תמונה כאן אם יש צורך
 
     const auth = getAuth();
+    const db = getFirestore();
 
-    createUserWithEmailAndPassword(auth, email, password, firstName, lastName)
-      .then((userCredential) => {
-        // Signed up 
-        const user = userCredential.user;
-        console.log(user);
-        console.log('register');
-        navigate("/SignIn");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-        alert("register failed: " + error.message);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Update the user's profile with additional information
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`,
+        photoURL: photoURL
       });
 
-    useEffect(() => {
-      const auth = getAuth();
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log('ההרשמה בוצעה בהצלחה', user.uid);
-        } else {
-          console.log('User is signed out');
-        }
+      // Save additional user data to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        photoURL: photoURL
       });
 
-      // Cleanup subscription on unmount
-      return () => unsubscribe();
-    }, [navigate]);
-  }
+      console.log('User profile updated and data saved to Firestore');
+      navigate("/SignIn");
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert("Register failed: " + error.message);
+    }
+  };
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('ההרשמה בוצעה בהצלחה', user.uid);
+      } else {
+        console.log('User is signed out');
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [navigate]);
 
   return (
     <ThemeProvider theme={defaultTheme}>

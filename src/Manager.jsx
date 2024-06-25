@@ -1,36 +1,18 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { CartContext } from './context/CartContextProducts.jsx';
-import { useNavigate } from 'react-router-dom';
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+
 import './General.css';
 
 export default function Manager() {
     const [productName, setProductName] = useState("");
-    const [productPrice, setProductPrice] = useState("");
+    const [productPrice, setProductPrice] = useState(0);
     const [productDetails, setProductDetails] = useState("");
     const [imgUrl, setImgUrl] = useState("");
     const [message, setMessage] = useState("");
 
     const { addProduct } = useContext(CartContext);
-
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const auth = getAuth();
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log('User is signed in:', user.uid);
-            } else {
-                navigate("/SignIn")
-                console.log('User is signed out');
-            }
-        });
-
-        // Cleanup subscription on unmount
-        return () => unsubscribe();
-    }, [navigate]);
 
     async function addData() {
         setMessage("");
